@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Urban Hound">
+  <rect width="512" height="512" rx="116" fill="#2b2620" />
+  <ellipse cx="256" cy="250" rx="96" ry="102" fill="#f4ecdd" />
+  <ellipse cx="168" cy="216" rx="32" ry="76" fill="#e6d9c0" transform="rotate(-18 168 216)" />
+  <ellipse cx="344" cy="216" rx="32" ry="76" fill="#e6d9c0" transform="rotate(18 344 216)" />
+  <ellipse cx="256" cy="312" rx="56" ry="46" fill="#f4ecdd" />
+  <circle cx="256" cy="300" r="15" fill="#2b2620" />
+  <circle cx="222" cy="234" r="12" fill="#2b2620" />
+  <circle cx="290" cy="234" r="12" fill="#2b2620" />
+</svg>
