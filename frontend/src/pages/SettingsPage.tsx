@@ -125,6 +125,19 @@ export function SettingsPage(): ReactNode {
             className="h-6 w-6 accent-brick"
           />
         </label>
+
+        <label className="flex items-center justify-between gap-3">
+          <span>
+            <span className="block text-sm font-medium text-ink">Daily treat time</span>
+            <span className="block text-xs text-ink-faint">When the treat nudge appears each day.</span>
+          </span>
+          <input
+            type="time"
+            value={state.settings.treatTime}
+            onChange={(event) => dispatch({ type: 'updateSettings', patch: { treatTime: event.target.value || '18:00' } })}
+            className="rounded-xl border border-ink/15 bg-paper px-3 py-2 text-sm text-ink"
+          />
+        </label>
       </section>
 
       <section className="card-paper space-y-3 p-4">

@@ -1,8 +1,10 @@
 # Urban Hound
 
-Field walk tracking, a retro photo kit, a daily vibe check, and ward broadcasts
-for well-kept city hounds. A PWA, built to be local-first and fully deployable
-to GitHub Pages.
+A hound's journal for well-kept city dogs. Owners log daily diary entries in
+the hound's voice, record moods, get a daily treat-time nudge, and play animal
+sounds to coax a dog along. It keeps the field walk tracking, retro photo kit,
+scrapbook, and ward broadcasts too. A PWA, built to be local-first and fully
+deployable to GitHub Pages.
 
 ## Structure
 
@@ -12,8 +14,24 @@ to GitHub Pages.
 | `backend/` | Optional FastAPI companion (geo, geofence, sessions, broadcasts, artifacts) |
 
 The app is designed to be used standalone: every feature works from a
-`localStorage`-persisted store with seeded demo data. The backend is a
-voluntary sync/archive layer — point `VITE_API_BASE` at it when you want one.
+`localStorage`-persisted store with seeded demo data (photos and short videos
+live in IndexedDB so the diary can go on and on without blowing the quota). The
+backend is a voluntary sync/archive layer — point `VITE_API_BASE` at it when
+you want one.
+
+## Features
+
+- **The Journal** — a dog-voice diary. Tap a pre-filled suggestion, roll
+  *Feeling lucky* for a random one, or type your own; tag a mood and attach a
+  photo or short video.
+- **Moods** — record the hound's mood (zoomies to under the weather) on any
+  entry.
+- **Treat time** — set a preferred time in Settings; the app nudges you to
+  answer whether the treat was given and to rate the hound's happiness.
+- **Sound board** — bundled offline audio (bark, howl, meow, purr, tweets,
+  squeaks, treat bag…) to grab a hound's attention. Replace the placeholder
+  clips under `frontend/public/sounds/` with your own recordings.
+- **Walks, camera, scrapbook, broadcasts** — the original field kit remains.
 
 ## Frontend
 

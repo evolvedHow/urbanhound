@@ -10,6 +10,7 @@
 import type {
   GeofenceZone,
   IncidentReport,
+  JournalEntry,
   LocationPoint,
   PhotoArtifact,
   PropPlacement,
@@ -18,6 +19,7 @@ import type {
   SightingReport,
   Subject,
   TaskSession,
+  TreatLog,
 } from '../types/domain'
 import { generateStatus } from './engine/humor'
 import { pathDistanceMeters } from './engine/geo'
@@ -31,6 +33,10 @@ export interface AppSettings {
   broadcastRadiusMeters: number
   retroFilterId: string
   hapticsEnabled: boolean
+  /** Wall-clock time, as `HH:MM`, at which the daily treat nudge appears. */
+  treatTime: string
+  /** Sound-board playback volume from 0 to 1. */
+  soundVolume: number
 }
 
 /** The complete persisted application state. */
@@ -43,6 +49,8 @@ export interface AppState {
   photos: PhotoArtifact[]
   incidents: IncidentReport[]
   sightings: SightingReport[]
+  journalEntries: JournalEntry[]
+  treatLogs: TreatLog[]
   settings: AppSettings
 }
 
@@ -59,6 +67,9 @@ export type AppAction =
   | { type: 'createIncident'; incident: IncidentReport }
   | { type: 'resolveIncident'; incidentId: string }
   | { type: 'addSighting'; sighting: SightingReport }
+  | { type: 'addJournalEntry'; entry: JournalEntry }
+  | { type: 'deleteJournalEntry'; entryId: string }
+  | { type: 'logTreat'; log: TreatLog }
   | { type: 'updateSettings'; patch: Partial<AppSettings> }
   | { type: 'reset' }
 
@@ -71,6 +82,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   broadcastRadiusMeters: 5000,
   retroFilterId: 'kodachrome',
   hapticsEnabled: true,
+  treatTime: '18:00',
+  soundVolume: 0.8,
 }
 
 /**
@@ -129,8 +142,67 @@ export function createInitialState(): AppState {
     photos: seeded.photos,
     incidents: [],
     sightings: [],
+    journalEntries: seedJournalEntries(atticus, pim),
+    treatLogs: [],
     settings: { ...DEFAULT_SETTINGS },
   }
+}
+
+/**
+ * Build the demo diary: a handful of dated entries in the hounds' voices.
+ *
+ * @param atticus - First seeded subject.
+ * @param pim - Second seeded subject.
+ * @returns Seeded journal entries, newest first.
+ */
+function seedJournalEntries(atticus: Subject, pim: Subject): JournalEntry[] {
+  const now = Date.now()
+  const format = (daysAgo: number, hour: number): string => {
+    const date = new Date(now - daysAgo * 86_400_000)
+    date.setHours(hour, 12, 0, 0)
+    return date.toISOString()
+  }
+  return [
+    {
+      entryId: uuid(),
+      subjectId: atticus.subjectId,
+      createdAt: format(0, 7),
+      bodyText:
+        'Woke at 5:47 a.m. to supervise a single leaf. It did not move. I remain vigilant.',
+      moodId: 'ZOOMIES',
+      media: [],
+      source: 'PROMPT',
+    },
+    {
+      entryId: uuid(),
+      subjectId: pim.subjectId,
+      createdAt: format(0, 9),
+      bodyText: 'Found the perfect sunbeam and colonized it. Borders are closed.',
+      moodId: 'CONTENT',
+      media: [],
+      source: 'LUCKY',
+    },
+    {
+      entryId: uuid(),
+      subjectId: atticus.subjectId,
+      createdAt: format(1, 18),
+      bodyText:
+        'Received a treat for doing absolutely nothing. Excellent system. No notes.',
+      moodId: 'JOYFUL',
+      media: [],
+      source: 'PROMPT',
+    },
+    {
+      entryId: uuid(),
+      subjectId: pim.subjectId,
+      createdAt: format(2, 20),
+      bodyText:
+        'The cat sat in my bed. In MY bed. War has been declared, very politely.',
+      moodId: 'GRUMPY',
+      media: [],
+      source: 'CUSTOM',
+    },
+  ]
 }
 
 /** A completed session bundled with its points and photos for seeding. */
@@ -354,6 +426,26 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       }
     case 'addSighting':
       return { ...state, sightings: [...state.sightings, action.sighting] }
+    case 'addJournalEntry':
+      return { ...state, journalEntries: [action.entry, ...state.journalEntries] }
+    case 'deleteJournalEntry':
+      return {
+        ...state,
+        journalEntries: state.journalEntries.filter(
+          (entry) => entry.entryId !== action.entryId,
+        ),
+      }
+    case 'logTreat':
+      return {
+        ...state,
+        treatLogs: [
+          ...state.treatLogs.filter(
+            (log) =>
+              !(log.subjectId === action.log.subjectId && log.forDate === action.log.forDate),
+          ),
+          action.log,
+        ],
+      }
     case 'updateSettings':
       return { ...state, settings: { ...state.settings, ...action.patch } }
     case 'reset':
@@ -495,18 +587,38 @@ function stepDistance(
 /**
  * Load persisted state from `localStorage`, falling back to the seed.
  *
+ * Older payloads written before the journal shipped are upgraded in place so a
+ * returning owner keeps their hounds, walks, and photos.
+ *
  * @returns The restored or freshly seeded state.
  */
 export function loadState(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
-      return JSON.parse(raw) as AppState
+      return migrateState(JSON.parse(raw) as Partial<AppState>)
     }
   } catch {
     // Corrupt payloads fall through to a fresh seed.
   }
   return createInitialState()
+}
+
+/**
+ * Backfill any fields missing from a persisted payload.
+ *
+ * @param parsed - The parsed (possibly older) state.
+ * @returns A complete state object.
+ */
+function migrateState(parsed: Partial<AppState>): AppState {
+  const seed = createInitialState()
+  return {
+    ...seed,
+    ...parsed,
+    journalEntries: parsed.journalEntries ?? [],
+    treatLogs: parsed.treatLogs ?? [],
+    settings: { ...DEFAULT_SETTINGS, ...parsed.settings },
+  }
 }
 
 /**
@@ -575,4 +687,110 @@ export function activeSession(state: AppState): TaskSession | null {
         session.status === 'DISPATCHED',
     ) ?? null
   )
+}
+
+/**
+ * Format a date as a `YYYY-MM-DD` local calendar key.
+ *
+ * @param date - The date to key.
+ * @returns A local calendar-day string.
+ */
+export function dateKey(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+/**
+ * Return all journal entries, newest first.
+ *
+ * @param state - The current state.
+ * @returns Journal entries in reverse-chronological order.
+ */
+export function sortedJournalEntries(state: AppState): JournalEntry[] {
+  return [...state.journalEntries].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )
+}
+
+/**
+ * Return journal entries for a single hound, newest first.
+ *
+ * @param state - The current state.
+ * @param subjectId - The hound to filter by.
+ * @returns That hound's journal entries.
+ */
+export function journalEntriesForSubject(
+  state: AppState,
+  subjectId: string,
+): JournalEntry[] {
+  return sortedJournalEntries(state).filter((entry) => entry.subjectId === subjectId)
+}
+
+/**
+ * Return journal entries written on a given calendar day.
+ *
+ * @param state - The current state.
+ * @param date - The day to filter by.
+ * @returns Entries created on that local day.
+ */
+export function journalEntriesForDay(state: AppState, date: Date): JournalEntry[] {
+  const key = dateKey(date)
+  return sortedJournalEntries(state).filter(
+    (entry) => dateKey(new Date(entry.createdAt)) === key,
+  )
+}
+
+/**
+ * Find a hound's treat log for a given calendar day.
+ *
+ * @param state - The current state.
+ * @param subjectId - The hound to query.
+ * @param date - The day to query.
+ * @returns The matching treat log, or `null`.
+ */
+export function treatLogForDay(
+  state: AppState,
+  subjectId: string,
+  date: Date,
+): TreatLog | null {
+  const key = dateKey(date)
+  return (
+    state.treatLogs.find(
+      (log) => log.subjectId === subjectId && log.forDate === key,
+    ) ?? null
+  )
+}
+
+/**
+ * Decide whether a hound's daily treat nudge is due.
+ *
+ * The nudge appears once the wall clock reaches the owner's preferred treat
+ * time and remains until it is answered for the day.
+ *
+ * @param state - The current state.
+ * @param subjectId - The hound to evaluate.
+ * @param now - The current time.
+ * @returns `true` when the treat prompt should be shown.
+ */
+export function isTreatDue(state: AppState, subjectId: string, now: Date): boolean {
+  if (treatLogForDay(state, subjectId, now)) {
+    return false
+  }
+  const [hour, minute] = state.settings.treatTime.split(':').map(Number)
+  const dueMinutes = (hour || 0) * 60 + (minute || 0)
+  const nowMinutes = now.getHours() * 60 + now.getMinutes()
+  return nowMinutes >= dueMinutes
+}
+
+/**
+ * Find a hound by identifier.
+ *
+ * @param state - The current state.
+ * @param subjectId - The hound identifier.
+ * @returns The hound, or `undefined`.
+ */
+export function findSubject(state: AppState, subjectId: string): Subject | undefined {
+  return state.subjects.find((subject) => subject.subjectId === subjectId)
 }

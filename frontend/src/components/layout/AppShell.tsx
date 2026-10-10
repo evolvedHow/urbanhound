@@ -29,7 +29,7 @@ export function AppShell(): ReactNode {
             <span className="leading-none">
               <span className="block font-display text-lg text-ink">Urban Hound</span>
               <span className="typewriter block text-[0.58rem] uppercase tracking-[0.24em] text-ink-faint">
-                Field Book
+                Hound Journal
               </span>
             </span>
           </Link>

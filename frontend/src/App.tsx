@@ -11,8 +11,10 @@ import { AppShell } from './components/layout/AppShell'
 import { AlertsPage } from './pages/AlertsPage'
 import { CameraPage } from './pages/CameraPage'
 import { HomePage } from './pages/HomePage'
+import { JournalPage } from './pages/JournalPage'
 import { ScrapbookPage } from './pages/ScrapbookPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { SoundsPage } from './pages/SoundsPage'
 import { SubjectDetailPage } from './pages/SubjectDetailPage'
 import { SubjectsPage } from './pages/SubjectsPage'
 import { WalkPage } from './pages/WalkPage'
@@ -28,6 +30,8 @@ export default function App(): ReactNode {
       <Routes>
         <Route element={<AppShell />}>
           <Route index element={<HomePage />} />
+          <Route path="journal" element={<JournalPage />} />
+          <Route path="sounds" element={<SoundsPage />} />
           <Route path="hounds" element={<SubjectsPage />} />
           <Route path="hounds/:subjectId" element={<SubjectDetailPage />} />
           <Route path="walk" element={<WalkPage />} />

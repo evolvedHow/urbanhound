@@ -197,3 +197,72 @@ export interface PropDefinition {
   label: string
   category: 'Wearables' | 'Badges' | 'Captions'
 }
+
+/** Mood a hound was in for a journal entry. */
+export type MoodId =
+  | 'ZOOMIES'
+  | 'JOYFUL'
+  | 'CONTENT'
+  | 'SLEEPY'
+  | 'HUNGRY'
+  | 'GRUMPY'
+  | 'ANXIOUS'
+  | 'POORLY'
+
+/** Kind of media attached to a journal entry. */
+export type MediaKind = 'PHOTO' | 'VIDEO'
+
+/** Where a journal entry's text came from. */
+export type JournalSource = 'PROMPT' | 'LUCKY' | 'CUSTOM'
+
+/**
+ * A photo or short video attached to a journal entry.
+ *
+ * The binary itself lives in IndexedDB (see `lib/media.ts`); the store keeps
+ * only this lightweight reference so entries remain small and serializable.
+ */
+export interface JournalMedia {
+  mediaId: string
+  kind: MediaKind
+  mimeType: string
+  caption: string
+}
+
+/** A dated diary entry written on behalf of a hound. */
+export interface JournalEntry {
+  entryId: string
+  subjectId: string
+  createdAt: string
+  bodyText: string
+  moodId: MoodId | null
+  media: JournalMedia[]
+  source: JournalSource
+}
+
+/**
+ * A completed (or declined) daily treat prompt for a hound.
+ *
+ * One record exists per hound per calendar day, written when the owner answers
+ * the treat-time nudge.
+ */
+export interface TreatLog {
+  logId: string
+  subjectId: string
+  /** Calendar day the prompt refers to, as `YYYY-MM-DD`. */
+  forDate: string
+  wasGiven: boolean
+  /** Owner-rated happiness from 1 to 5, or `null` when not rated. */
+  happinessRating: number | null
+  loggedAt: string
+}
+
+/** A playable animal sound used to attract a hound. */
+export interface SoundClip {
+  soundId: string
+  label: string
+  /** Animal family the clip belongs to. */
+  group: 'Dog' | 'Cat' | 'Bird' | 'Other'
+  /** Filename relative to the app's public `sounds/` directory. */
+  file: string
+  emoji: string
+}

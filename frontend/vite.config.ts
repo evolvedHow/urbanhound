@@ -23,7 +23,7 @@ export default defineConfig({
         name: 'Urban Hound',
         short_name: 'Urban Hound',
         description:
-          'Field walk tracking, a retro photo kit, and a refined daily vibe for city hounds.',
+          "A hound's journal — diary entries, moods, treat nudges, and an animal sound board for well-kept city hounds.",
         theme_color: '#2b2620',
         background_color: '#f4ecdd',
         display: 'standalone',

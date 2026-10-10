@@ -28,6 +28,37 @@ const TABS: TabItem[] = [
     ),
   },
   {
+    to: '/journal',
+    label: 'Journal',
+    icon: (
+      <svg viewBox="0 0 24 24" className={ICON_CLASS} fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M6 4h10a2 2 0 0 1 2 2v14H8a2 2 0 0 1-2-2V4z" strokeLinejoin="round" />
+        <path d="M6 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2M10 9h5M10 13h5" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    to: '/sounds',
+    label: 'Sounds',
+    icon: (
+      <svg viewBox="0 0 24 24" className={ICON_CLASS} fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M5 10v4h3l4 3V7L8 10H5z" strokeLinejoin="round" />
+        <path d="M16 9.5a4 4 0 0 1 0 5M18.5 7a7 7 0 0 1 0 10" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    to: '/camera',
+    label: 'Camera',
+    icon: (
+      <svg viewBox="0 0 24 24" className={ICON_CLASS} fill="none" stroke="currentColor" strokeWidth="1.6">
+        <rect x="4" y="7" width="16" height="12" rx="2" />
+        <path d="M9 7l1.2-2h3.6L15 7" strokeLinejoin="round" />
+        <circle cx="12" cy="13" r="3.2" />
+      </svg>
+    ),
+  },
+  {
     to: '/hounds',
     label: 'Hounds',
     icon: (
@@ -36,36 +67,6 @@ const TABS: TabItem[] = [
         <circle cx="9.5" cy="12" r="0.9" fill="currentColor" stroke="none" />
         <circle cx="14.5" cy="12" r="0.9" fill="currentColor" stroke="none" />
         <path d="M10.5 15.5c1 .8 2 .8 3 0" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    to: '/walk',
-    label: 'Walk',
-    icon: (
-      <svg viewBox="0 0 24 24" className={ICON_CLASS} fill="none" stroke="currentColor" strokeWidth="1.6">
-        <circle cx="12" cy="6" r="2.2" />
-        <path d="M12 8.5 10 13l-2.5 2M12 8.5 14 13l1 6M10 13l-1 6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    to: '/scrapbook',
-    label: 'Scrapbook',
-    icon: (
-      <svg viewBox="0 0 24 24" className={ICON_CLASS} fill="none" stroke="currentColor" strokeWidth="1.6">
-        <rect x="4" y="5" width="16" height="14" rx="2" />
-        <path d="M8 5v14M4 9h4M4 15h4" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  {
-    to: '/alerts',
-    label: 'Alerts',
-    icon: (
-      <svg viewBox="0 0 24 24" className={ICON_CLASS} fill="none" stroke="currentColor" strokeWidth="1.6">
-        <path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15L6 17z" strokeLinejoin="round" />
-        <path d="M10.5 21a1.6 1.6 0 0 0 3 0" strokeLinecap="round" />
       </svg>
     ),
   },
